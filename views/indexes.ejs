@@ -1,0 +1,181 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <div class="header">
+      <h2>&nbsp;&nbsp;Skopos Demo</h2>
+    </div>
+    <div class="left">
+    <table id="indexes">
+       <tr>
+          <th>Name</th><th>Tickers</th><th>Weights</th><th>Value</th><th>Start Date</th><th>Control</th>
+       </tr>
+
+       <% for (var i = 0; i < results.length; i++) { %>
+        <tr>
+          <td><%= results[i].name %></td>
+          <td><%= results[i].tickers %></td>
+          <td><%= results[i].weights %></td>
+          <td class="dollars"><%= results[i].value %></td>
+          <td><%= results[i].start %></td>
+          <td><button class="editRow">Edit</button>
+          <button class="deleteRow">Delete</button>
+          <button onclick="document.getElementById('graph').src = '/indexes/<%= results[i].name %>'">View</button></td>
+        </tr>    
+       <% } %>
+    </table>
+    </div>
+    <div class="right">
+    <form id="newIndex">
+        <label for="tickers">Tickers:</label>
+        <input id="tickers" name="tickers" value="" placeholder="AAPL,MSFT,GOOG" required>
+        <br>
+        <label for="weights">Weights:</label>
+        <input id="weights" name="weights" placeholder="30,40,30" required>
+        <br>
+        <div style="float:left; width:48%">
+            <label for="value">Index-Value:</label>
+            <input id="value" name="value" placeholder="5000" required>
+        </div>
+        <div style="float: right; width:48%">
+            <label for="name">Name:</label>
+            <input id="name" name="name" value="" placeholder="WeightedIndex2021" required>
+        </div>
+        <div style="float:left; width:48%">
+            <label for="start">Start-Date:</label>
+            <input id="start" name="start" type="date" max="<%= maxDate %>" value=""required>
+        </div>
+        <div style="float: right; width:48%">
+            <label for="postSubmit">Create/Edit:</label>
+            <input id="postSubmit" type="submit" value="Submit">
+            <button id="loadCsv">Import CSV Baskets (data/baskets/)</button>
+        </div>
+    </form>
+    <form>
+        <div class="form-group">
+          <input type="file" id="files"  class="inputfile" accept=".csv" required />
+        </div>
+    </form>
+    </div>
+    <iframe id="graph" width="100%" height="45%" style="border:none;">
+    </iframe>
+<script>
+<%if (results.length > 0) { %>
+document.getElementById('graph').src = '/indexes/<%= results[0].name %>'
+<% } %>
+
+$("#loadCsv").click(function(){
+  $.get("/loadCsv", function(data, status){
+    location.reload();
+  });
+});
+
+//Fill form on edit
+$(".editRow").click(function() {
+    var $item = $(this).closest("tr");
+
+    $("#name").val($item.find("td:eq(0)").text());
+    $("#tickers").val($item.find("td:eq(1)").text());
+    $("#weights").val($item.find("td:eq(2)").text());
+    $("#value").val($item.find("td:eq(3)").text());
+    $("#start").val($item.find("td:eq(4)").text());
+});
+
+//Delete ID
+$(".deleteRow").click(function() {
+    var r = confirm("Are you sure you want to delete this?");
+    if (r == true) {
+        var $item = $(this).closest("tr");
+        const name = $item.find("td:eq(0)").text();
+        const response = fetch("/indexes/"+name, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        location.reload();
+    } else {
+        return;
+    }
+});
+
+const form = document.getElementById('newIndex');
+form.addEventListener('submit', async function (e) {
+
+    $("#tickers").val($("#tickers").val().replace(/\s/g, ""));
+    $("#weights").val($("#weights").val().replace(/\s/g, ""));
+
+    e.preventDefault();
+    const formData = new FormData(form).entries()
+    const formBody = Object.fromEntries(formData)
+
+    //      //
+    // Name //
+    if(formBody.name.length < 1 || formBody.name.length > 20) {
+        window.alert("Name length should be 1 to 20 characters.");
+        return;
+    }
+
+    //         //
+    // Tickers //
+    var tickersArr = formBody.tickers.split(",");
+    if (tickersArr.length == 0 || formBody.tickers == "") { 
+        window.alert("Tickers count needs to be greater than 0.")
+        return;
+    }
+
+    //         //
+    // Weights //
+    var weightsArr = formBody.weights.split(",");
+    if (weightsArr.length != tickersArr.length || formBody.weights == "") { 
+        window.alert("Weights count needs to be equal to tickers count.")
+        return;
+    }
+    weightsTotal = 0;
+    for (i = 0; i < weightsArr.length; i++) {
+        w = weightsArr[i];
+        var regex=/^[0-9]+$/;
+        if(!w.match(regex) || w < 1 || w > 100) {
+            window.alert("Weights need to be a number from 1 to 100.")
+            return;
+        }
+        weightsTotal = weightsTotal + Number(w);
+    }
+    if (weightsTotal != 100) {
+        window.alert("Weights need to add up to 100.")
+        return;
+    }
+
+    //       //
+    // Value //
+    var value = formBody.value;
+    var regex=/^[0-9]+$/;
+    if(!value.match(regex) || value < 0) {
+        window.alert("Value need to be a number greater than 0.")
+        return;
+    }
+
+    //       //
+    // Start Date //
+    var value = formBody.value;
+    var regex=/^[0-9]+$/;
+    if(!value.match(regex) || value < 0) {
+        window.alert("Value need to be a number greater than 0.")
+        return;
+    }
+
+
+    const response = await fetch("indexes/"+formBody.name, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formBody)
+    });
+
+    location.reload();
+});
+</script>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+div.left {
+        margin:4px, 4px;
+        padding:4px;
+        width: 68%;
+        height: 45%;
+        overflow-x: scroll;
+        overflow-y: auto;
+        text-align:justify;
+        float: left;
+    }
+div.right {
+        margin:4px, 4px;
+        padding:4px;
+        width: 30%;
+        height: 45%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        text-align:justify;
+        float: right;
+    }
+#indexes {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#indexes td, #indexes th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  font-size: 14px;
+}
+
+#indexes tr:nth-child(even){background-color: #f2f2f2;}
+
+#indexes tr:hover {background-color: #ddd;}
+
+#indexes th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #3b9edb;
+  color: white;
+}
+input[text]:focus {
+  border: 3px solid #555;
+}
+input {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+.dollars:before {
+  content: "$";
+}
+.inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+.inputfile + label {
+    font-size: 1.25em;
+    font-weight: 700;
+    color: white;
+    background-color: black;
+    display: inline-block;
+}
+
+.inputfile:focus + label,
+.inputfile + label:hover {
+    background-color: red;
+}
+
+body {
+  background-color: #f7f8fa;
+}
+
+.header {
+  padding: 0px;
+  margin: -10px;
+  text-align: left;
+  background: #3b9edb;
+  color: white;
+  font-size: 30px;
+  font-family: Helvetica;
+}
