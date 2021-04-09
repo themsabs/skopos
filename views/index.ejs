@@ -12,52 +12,79 @@
     <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        var seriesOptions = []
+    var chart;
+    var seriesOptions = []
 
-        function createChart() {
-            Highcharts.stockChart('container', {
+    function createChart() {
+        return Highcharts.stockChart('container', {
 
-                rangeSelector: {
-                    selected: 4
-                },
+            rangeSelector: {
+                selected: 4
+            },
 
-                yAxis: {
-                    labels: {
-                        formatter: function () {
-                            return (this.value > 0 ? ' + ' : '') + this.value + '%';
-                        }
-                    },
-                    plotLines: [{
-                        value: 0,
-                        width: 2,
-                        color: 'silver'
-                    }]
-                },
-                plotOptions: {
-                    series: {
-                        compare: null,
-                        showInNavigator: true
+            yAxis: {
+                labels: {
+                    formatter: function () {
+                        return (this.value > 0 ? ' + ' : '') + this.value + '%';
                     }
                 },
+                plotLines: [{
+                    value: 0,
+                    width: 2,
+                    color: 'silver'
+                }]
+            },
+            plotOptions: {
+                series: {
+                    compare: 'percent',
+                    showInNavigator: true
+                }
+            },
 
-                tooltip: {
-                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
-                    valueDecimals: 2,
-                    split: true
-                },
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
+                valueDecimals: 2,
+                split: true
+            },
 
-                series: <%- data %>
+            series: <%- data %>
+        });
+    }
+
+    function showHide(i, e) {
+        var series = chart.series[i];
+        if (series.visible) {
+            series.hide();
+            var temp = e.target.innerHTML;
+            temp = temp.replace("Hide", "Show");
+            e.target.innerHTML = temp;
+        } else {
+            series.show();
+            var temp = e.target.innerHTML;
+            temp = temp.replace("Show", "Hide");
+            e.target.innerHTML = temp;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        chart = createChart();
+        var elements = document.getElementsByClassName("showHide");
+        for (var i = 0; i < elements.length; i++) {
+            const num = i;
+            elements[i].addEventListener('click', e => { 
+                showHide(num, e) 
             });
         }
-        createChart();
-
-      });
+    });
     </script>
 
 </head>
 
 <body>
+    <% var dataJson = JSON.parse(data); %>
+    <% for (var i = 0; i < dataJson.length; i++) { %>
+    <button class="showHide" data-count="<%= i %>">Hide <%= dataJson[i].name %></button>
+    <% } %>
     <figure class="highcharts-figure">
       <div id="container"></div>
     </figure>

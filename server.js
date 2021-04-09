@@ -132,7 +132,7 @@ app.get('/indexes/:id', async function (req, res) {
 		    	var shares = 0;
 		    	var valuePerDay = [];
 		    	for (j = 0; j < json.length; j++) {
-		    		if(!json[j].date.includes(result.start)) continue;
+		    		if(new Date(json[j].date) <= new Date(result.start)) continue;
 		     		else {
 		     			shares = (startingCapital / parseFloat(json[j].close));
 		     			break;
